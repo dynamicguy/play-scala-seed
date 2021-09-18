@@ -1,0 +1,7 @@
+version: '3'
+
+services:
+  web:
+    image: ferdous/play-scala-seed:stable
+    ports:
+      - 9000:9000
