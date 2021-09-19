@@ -1,12 +1,12 @@
 play-scala-seed
 ===============
 
+[![OSSAR](https://github.com/dynamicguy/play-scala-seed/actions/workflows/ossar-analysis.yml/badge.svg)](https://github.com/dynamicguy/play-scala-seed/actions/workflows/ossar-analysis.yml)
+[![Scala CI](https://github.com/dynamicguy/play-scala-seed/actions/workflows/scala.yml/badge.svg)](https://github.com/dynamicguy/play-scala-seed/actions/workflows/scala.yml)
+
 An example playframework scala app with docker integration using sbt-docker plugin
 
 ![home page](public/images/site.png "screenshot")
-
-[![OSSAR](https://github.com/dynamicguy/play-scala-seed/actions/workflows/ossar-analysis.yml/badge.svg)](https://github.com/dynamicguy/play-scala-seed/actions/workflows/ossar-analysis.yml)
-[![Scala CI](https://github.com/dynamicguy/play-scala-seed/actions/workflows/scala.yml/badge.svg)](https://github.com/dynamicguy/play-scala-seed/actions/workflows/scala.yml)
 
 ### How to push in docker hub
 Please make sure you are loggedin in docker hub. Do login `docker login` if necessary.
