@@ -2,22 +2,29 @@ import play.core.PlayVersion.akkaVersion
 
 name := """play-scala-seed"""
 organization := "com.dynamicguy"
+maintainer := "Nurul Ferdous <nurul@ferdo.us>"
 
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, sbtdocker.DockerPlugin, JavaAppPackaging)
 scalaVersion := "2.13.6"
-
+// These options will be used for *all* versions.
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-unchecked",
+  "-encoding", "UTF-8",
+  "-Xlint",
+)
 
 libraryDependencies += guice
 libraryDependencies += "com.typesafe.play" %% "play-slick" % "5.0.0"
 libraryDependencies += "com.typesafe.play" %% "play-slick-evolutions" % "5.0.0"
-libraryDependencies += "com.h2database" % "h2" % "1.4.199"
+libraryDependencies += "com.h2database" % "h2" % "1.4.200"
 libraryDependencies += "org.webjars" %% "webjars-play" % "2.8.8"
 libraryDependencies += "org.webjars" % "flot" % "0.8.3-1"
 libraryDependencies += "org.webjars" % "bootstrap" % "5.1.0"
 libraryDependencies += "net.logstash.logback" % "logstash-logback-encoder" % "6.2"
-libraryDependencies += "org.jsoup" % "jsoup" % "1.12.1"
+libraryDependencies += "org.jsoup" % "jsoup" % "1.14.2"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test
@@ -41,7 +48,6 @@ docker / dockerfile := {
   }
 }
 
-
 // Set names for the image
 docker / imageNames := Seq(
   ImageName("ferdous/play-scala-seed:latest"),
@@ -49,4 +55,3 @@ docker / imageNames := Seq(
     repository = name.value,
     tag = Some("v" + version.value))
 )
-
