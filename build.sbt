@@ -1,3 +1,5 @@
+import play.core.PlayVersion.akkaVersion
+
 name := """play-scala-seed"""
 organization := "com.dynamicguy"
 
@@ -8,6 +10,18 @@ scalaVersion := "2.13.6"
 
 
 libraryDependencies += guice
+libraryDependencies += "com.typesafe.play" %% "play-slick" % "5.0.0"
+libraryDependencies += "com.typesafe.play" %% "play-slick-evolutions" % "5.0.0"
+libraryDependencies += "com.h2database" % "h2" % "1.4.199"
+libraryDependencies += "org.webjars" %% "webjars-play" % "2.8.8"
+libraryDependencies += "org.webjars" % "flot" % "0.8.3-1"
+libraryDependencies += "org.webjars" % "bootstrap" % "5.1.0"
+libraryDependencies += "net.logstash.logback" % "logstash-logback-encoder" % "6.2"
+libraryDependencies += "org.jsoup" % "jsoup" % "1.12.1"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
+libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test
+libraryDependencies += "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
 
 // Adds additional packages into Twirl
@@ -30,8 +44,9 @@ docker / dockerfile := {
 
 // Set names for the image
 docker / imageNames := Seq(
-  ImageName("ferdous/play-scala-seed:stable"),
+  ImageName("ferdous/play-scala-seed:latest"),
   ImageName(namespace = Some("ferdous"),
     repository = name.value,
     tag = Some("v" + version.value))
 )
+

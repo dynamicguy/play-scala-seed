@@ -1,45 +1,75 @@
 package controllers
 
+import java.io.IOException
+
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play._
-import org.scalatestplus.play.guice._
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test._
-import play.api.test.Helpers._
+import play.shaded.ahc.org.asynchttpclient.AsyncHttpClient
+import play.shaded.ahc.org.asynchttpclient.ws.WebSocket
 
-/**
- * Add your spec here.
- * You can mock out a whole application including requests, plugins etc.
- *
- * For more information, see https://www.playframework.com/documentation/latest/ScalaTestingWithScalaTest
- */
-class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
+import scala.compat.java8.FutureConverters
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
-  "HomeController GET" should {
+class HomeControllerSpec extends PlaySpec with ScalaFutures with IntegrationPatience {
 
-    "render the index page from a new instance of controller" in {
-      val controller = new HomeController(stubControllerComponents())
-      val home = controller.index().apply(FakeRequest(GET, "/"))
+  "HomeController" should {
 
-      status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+    "reject a websocket flow if the origin is set incorrectly" in WsTestClient.withClient { client =>
+
+      // Pick a non standard port that will fail the (somewhat contrived) origin check...
+      lazy val port: Int = 31337
+      val app = new GuiceApplicationBuilder().build()
+      Helpers.running(TestServer(port, app)) {
+        val myPublicAddress = s"localhost:$port"
+        val serverURL = s"ws://$myPublicAddress/chat"
+
+        val asyncHttpClient: AsyncHttpClient = client.underlying[AsyncHttpClient]
+
+        val webSocketClient = new WebSocketClient(asyncHttpClient)
+        try {
+          val origin = "ws://example.com/ws/chat"
+          val listener = new WebSocketClient.LoggingListener
+          val completionStage = webSocketClient.call(serverURL, origin, listener)
+          val f = FutureConverters.toScala(completionStage)
+          Await.result(f, atMost = 1000 millis)
+          listener.getThrowable mustBe a[IOException]
+        } catch {
+          case e: IllegalStateException =>
+            e mustBe an [IllegalStateException]
+
+          case e: java.util.concurrent.ExecutionException =>
+            val foo = e.getCause
+            foo mustBe an [IOException]
+        }
+      }
     }
 
-    "render the index page from the application" in {
-      val controller = inject[HomeController]
-      val home = controller.index().apply(FakeRequest(GET, "/"))
+    "accept a websocket flow if the origin is set correctly" in WsTestClient.withClient { client =>
+      lazy val port: Int = Helpers.testServerPort
+      val app = new GuiceApplicationBuilder().build()
+      Helpers.running(TestServer(port, app)) {
+        val myPublicAddress = s"localhost:$port"
+        val serverURL = s"ws://$myPublicAddress/chat"
 
-      status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
-    }
+        val asyncHttpClient: AsyncHttpClient = client.underlying[AsyncHttpClient]
 
-    "render the index page from the router" in {
-      val request = FakeRequest(GET, "/")
-      val home = route(app, request).get
+        val webSocketClient = new WebSocketClient(asyncHttpClient)
 
-      status(home) mustBe OK
-      contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Welcome to Play")
+        val origin = serverURL
+        val listener = new WebSocketClient.LoggingListener
+        val completionStage = webSocketClient.call(serverURL, origin, listener)
+        val f = FutureConverters.toScala(completionStage)
+
+        whenReady(f, timeout = Timeout(1 second)) { webSocket =>
+          webSocket mustBe a [WebSocket]
+        }
+      }
     }
   }
+
 }
