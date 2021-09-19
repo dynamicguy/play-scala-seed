@@ -3,6 +3,7 @@ play-scala-seed
 
 An example playframework scala app with docker integration using sbt-docker plugin
 
+![home page](public/images/site.png "screenshot")
 ### How to push in docker hub
 Please make sure you are loggedin in docker hub. Do login `docker login` if necessary.
 
