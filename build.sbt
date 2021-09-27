@@ -7,6 +7,7 @@ maintainer := "Nurul Ferdous <nurul@ferdo.us>"
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala, sbtdocker.DockerPlugin, JavaAppPackaging)
+
 scalaVersion := "2.13.6"
 // These options will be used for *all* versions.
 scalacOptions ++= Seq(
@@ -27,6 +28,8 @@ libraryDependencies += "net.logstash.logback" % "logstash-logback-encoder" % "6.
 libraryDependencies += "org.jsoup" % "jsoup" % "1.14.2"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % akkaVersion
+libraryDependencies += "com.rabbitmq" % "amqp-client" % "5.13.1"
+
 libraryDependencies += "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
@@ -36,17 +39,32 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.dynamicguy.binders._"
+// docker / dockerfile := {
+//   val appDir: File = stage.value
+//   val targetDir = "/app"
+
+//   new Dockerfile {
+//     from("openjdk:11-jre")
+//     expose(9000)
+//     entryPoint(s"$targetDir/bin/${executableScriptName.value}")
+//     copy(appDir, targetDir, chown = "daemon:daemon")
+//     runRaw("")
+//   }
+// }
+
 docker / dockerfile := {
-  val appDir: File = stage.value
-  val targetDir = "/app"
+  // The assembly task generates a fat JAR file
+  val artifact: File = assembly.value
+  val artifactTargetPath = s"/app/${artifact.name}"
 
   new Dockerfile {
     from("openjdk:11-jre")
-    expose(9000)
-    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
-    copy(appDir, targetDir, chown = "daemon:daemon")
+    add(artifact, artifactTargetPath)
+    entryPoint("java", "-jar", artifactTargetPath)
   }
 }
+
+// docker := (docker dependsOn assembly)
 
 // Set names for the image
 docker / imageNames := Seq(
@@ -55,3 +73,5 @@ docker / imageNames := Seq(
     repository = name.value,
     tag = Some("v" + version.value))
 )
+
+docker / buildOptions := BuildOptions(cache = false)

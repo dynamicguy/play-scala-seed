@@ -1,7 +1,17 @@
-version: '3'
+version: '3.7'
 
 services:
   web:
     image: ferdous/play-scala-seed:stable
+    domainname: dev.alex4im.com
+    hostname: dev.alex4im.com
     ports:
       - 9000:9000
+#
+#  rabbitmq:
+#    image: rabbitmq
+#    ports:
+#      - 5672:5672
+#
+#  postgres:
+#    image: postgres
