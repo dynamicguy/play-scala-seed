@@ -20,7 +20,3 @@ jobs:
         distribution: 'adopt'
     - name: Run tests
       run: sbt test
-    - name: Run docker
-      run: sbt docker
-    - name: Push docker image
-      run: sbt -Denv=dev dockerBuildAndPush
