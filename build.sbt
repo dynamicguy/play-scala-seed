@@ -39,32 +39,18 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.dynamicguy.binders._"
-// docker / dockerfile := {
-//   val appDir: File = stage.value
-//   val targetDir = "/app"
-
-//   new Dockerfile {
-//     from("openjdk:11-jre")
-//     expose(9000)
-//     entryPoint(s"$targetDir/bin/${executableScriptName.value}")
-//     copy(appDir, targetDir, chown = "daemon:daemon")
-//     runRaw("")
-//   }
-// }
-
 docker / dockerfile := {
-  // The assembly task generates a fat JAR file
-  val artifact: File = assembly.value
-  val artifactTargetPath = s"/app/${artifact.name}"
+  val appDir: File = stage.value
+  val targetDir = "/app"
 
   new Dockerfile {
     from("openjdk:11-jre")
-    add(artifact, artifactTargetPath)
-    entryPoint("java", "-jar", artifactTargetPath)
+    expose(9000)
+    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
+    copy(appDir, targetDir, chown = "daemon:daemon")
+    runRaw("")
   }
 }
-
-// docker := (docker dependsOn assembly)
 
 // Set names for the image
 docker / imageNames := Seq(
