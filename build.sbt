@@ -48,7 +48,6 @@ docker / dockerfile := {
     expose(9000)
     entryPoint(s"$targetDir/bin/${executableScriptName.value}")
     copy(appDir, targetDir, chown = "daemon:daemon")
-    runRaw("")
   }
 }
 
@@ -59,5 +58,3 @@ docker / imageNames := Seq(
     repository = name.value,
     tag = Some("v" + version.value))
 )
-
-docker / buildOptions := BuildOptions(cache = false)
